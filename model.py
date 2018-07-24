@@ -94,8 +94,8 @@ def get_one_data(annotation_line, input_shape):
     return image_data, box
 
 #print(line)
-input_shape = (320, 240)
-grid_shape = (20, 15)
+input_shape = (448, 448)
+grid_shape = (7, 7)
 batch_size = 16
 """
 with open('./train.txt', 'r') as f:
@@ -133,7 +133,7 @@ label[0, i, j, :] = box[0, :]
 print(label[..., 4:5].shape)
 """
 
-def data_generator(annotation_path, batch_size, grid_shape=(20, 15)):
+def data_generator(annotation_path, batch_size, grid_shape=(7, 7)):
     with open(annotation_path, 'r') as f:
         annotation_lines = f.readlines()
     index = 0   
@@ -161,7 +161,7 @@ def data_generator(annotation_path, batch_size, grid_shape=(20, 15)):
         i = np.floor(box[..., 1] * grid_shape[0]).astype('int32')
         label = np.zeros((batch_size, grid_shape[0], grid_shape[1], 5))
         label[0, i, j, :] = box[0, :]
-        print(index, index+batch_size)
+        #print(index, index+batch_size)
 
         yield [image, label], np.zeros(batch_size)
         #index = index + batch_size
@@ -172,10 +172,11 @@ def data_generator(annotation_path, batch_size, grid_shape=(20, 15)):
 #for _, data in data_generator("./train.txt", batch_size):
 #    print(data)
     
-def yolo_loss(args, batch_size=16, grid_shape=(20,15)):
+def yolo_loss(args, batch_size=16, grid_shape=(7,7)):
     y_true = args[1]
     y_pred = args[0]
-    print(y_pred.shape)
+    y_pred = K.reshape(y_pred, (7,7,5))
+    #print(y_pred.shape)
     obj_mask = y_true[..., 4]
     nonobj_mask = 1 - obj_mask
     #print(y_true)
